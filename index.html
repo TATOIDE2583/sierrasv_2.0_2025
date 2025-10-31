@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Experience - 3 Videos</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        /* Pantalla de carga */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #loading-screen.hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #25D366;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #25D366;
+        }
+
+        .loading-instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            max-width: 500px;
+            border-left: 4px solid #25D366;
+        }
+
+        .loading-instructions h3 {
+            margin-top: 0;
+            color: #25D366;
+        }
+
+        .instruction-item {
+            margin: 15px 0;
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+        }
+
+        /* Botones de WhatsApp modernos */
+        .whatsapp-btn-3d {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .whatsapp-btn-3d::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .whatsapp-btn-3d:hover::before {
+            left: 100%;
+        }
+
+        .whatsapp-btn-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+        }
+
+        .whatsapp-icon {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de carga -->
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div class="loading-title">Cargando Experiencia de Realidad Aumentada</div>
+        
+        <div class="loading-instructions">
+            <h3>📋 Instrucciones:</h3>
+            <div class="instruction-item">📷 <strong>Permita acceso a la cámara</strong> cuando se le solicite</div>
+            <div class="instruction-item">🎯 <strong>Apunte al cartel</strong> con la cámara de su dispositivo</div>
+            <div class="instruction-item">👆 <strong>Presione en el video</strong> para reproducir y pausar</div>
+            <div class="instruction-item">📏 <strong>Agrande o achique el video</strong> con 2 dedos (en móvil)</div>
+            <div class="instruction-item">💬 <strong>Presione "Consultar"</strong> para contactar al vendedor por WhatsApp</div>
+        </div>
+
+        <button id="start-button" class="start-button" style="display: none;">
+            🚀 Iniciar Experiencia
+        </button>
+    </div>
+
+    <a-scene 
+        mindar-image="imageTargetSrc: ./marker.mind; autoStart: false;" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false" 
+        renderer="colorManagement: true;"
+        loading-screen="enabled: false"
+    >
+        <a-assets>
+            <!-- Videos con sonido (sin muted) -->
+            <video id="video1" src="./asset.mp4" loop playsinline preload="auto"></video>
+            <video id="video2" src="./mina_clavero.mp4" loop playsinline preload="auto"></video>
+            <video id="video3" src="./merlo.mp4" loop playsinline preload="auto"></video>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
+            <!-- Video 1 - Carlos Paz -->
+            <a-entity id="video-container-1" position="-1 0 0">
+                <a-video
+                    id="video-element-1"
+                    src="#video1"
+                    position="0 0 0"
+                    width="1"
+                    height="1.4"
+                    class="clickable"
+                    mindar-video-handler="videoId: 1"
+                    video-controls="videoId: 1"
+                ></a-video>
+                <!-- Botón de WhatsApp moderno -->
+                <a-entity 
+                    id="whatsapp-3d-1"
+                    position="0 -0.9 0.01"
+                    geometry="primitive: plane; width: 0.9; height: 0.25"
+                    material="color: #25D366; shader: flat"
+                    class="clickable whatsapp-btn-3d"
+                    whatsapp-button="videoId: 1"
+                    text="value: 💬 Consultar Carlos Paz; color: white; align: center; width: 1.8"
+                ></a-entity>
+            </a-entity>
+            
+            <!-- Video 2 - Mina Clavero -->
+            <a-entity id="video-container-2" position="0 -1 0">
+                <a-video
+                    id="video-element-2"
+                    src="#video2"
+                    position="0 0 0"
+                    width="1"
+                    height="1.4"
+                    class="clickable"
+                    mindar-video-handler="videoId: 2"
+                    video-controls="videoId: 2"
+                ></a-video>
+                <!-- Botón de WhatsApp moderno -->
+                <a-entity 
+                    id="whatsapp-3d-2"
+                    position="0 -0.9 0.01"
+                    geometry="primitive: plane; width: 0.9; height: 0.25"
+                    material="color: #25D366; shader: flat"
+                    class="clickable whatsapp-btn-3d"
+                    whatsapp-button="videoId: 2"
+                    text="value: 💬 Consultar Mina Clavero; color: white; align: center; width: 1.8"
+                ></a-entity>
+            </a-entity>
+            
+            <!-- Video 3 - Merlo -->
+            <a-entity id="video-container-3" position="1 0 0">
+                <a-video
+                    id="video-element-3"
+                    src="#video3"
+                    position="0 0 0"
+                    width="1"
+                    height="1.4"
+                    class="clickable"
+                    mindar-video-handler="videoId: 3"
+                    video-controls="videoId: 3"
+                ></a-video>
+                <!-- Botón de WhatsApp moderno -->
+                <a-entity 
+                    id="whatsapp-3d-3"
+                    position="0 -0.9 0.01"
+                    geometry="primitive: plane; width: 0.9; height: 0.25"
+                    material="color: #25D366; shader: flat"
+                    class="clickable whatsapp-btn-3d"
+                    whatsapp-button="videoId: 3"
+                    text="value: 💬 Consultar Merlo; color: white; align: center; width: 1.8"
+                ></a-entity>
+            </a-entity>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        // Variables globales
+        let currentVideoId = 1;
+        const videos = [
+            document.querySelector('#video1'),
+            document.querySelector('#video2'), 
+            document.querySelector('#video3')
+        ];
+
+        // Configuración de WhatsApp (MODIFICA ESTOS DATOS)
+        const whatsappConfig = {
+            phoneNumber: "5491234567890", // Reemplaza con el número real
+            messages: {
+                1: "¡Hola! Me interesa saber las fechas disponibles para Carlos Paz 🏞️",
+                2: "¡Hola! Me interesa saber las fechas disponibles para Mina Clavero 🏔️",
+                3: "¡Hola! Me interesa saber las fechas disponibles para Merlo 🏕️"
+            }
+        };
+
+        // Componente para botones de WhatsApp en 3D
+        AFRAME.registerComponent('whatsapp-button', {
+            init: function () {
+                this.videoId = this.data.videoId;
+                
+                this.el.addEventListener('click', () => {
+                    this.openWhatsApp();
+                });
+            },
+            
+            openWhatsApp: function() {
+                const message = encodeURIComponent(whatsappConfig.messages[this.videoId]);
+                const url = `https://wa.me/${whatsappConfig.phoneNumber}?text=${message}`;
+                window.open(url, '_blank');
+            }
+        });
+
+        // Función para pausar todos los videos
+        function pauseAllVideos(exceptVideoId = null) {
+            videos.forEach((video, index) => {
+                if (video && (exceptVideoId === null || (index + 1) !== exceptVideoId)) {
+                    video.pause();
+                }
+            });
+        }
+
+        // Función para reproducir un video específico
+        function playVideo(videoId) {
+            const videoIndex = videoId - 1;
+            const video = videos[videoIndex];
+            
+            if (video && video.paused) {
+                // Pausar todos los otros videos antes de reproducir
+                pauseAllVideos(videoId);
+                
+                video.play().catch(err => {
+                    console.log(`Haz clic en la pantalla para activar el sonido del video ${videoId}`);
+                });
+                currentVideoId = videoId;
+                console.log(`Video ${videoId} reproducido (otros pausados)`);
+            } else if (video && !video.paused) {
+                // Si ya está reproduciéndose, pausarlo
+                video.pause();
+                console.log(`Video ${videoId} pausado`);
+            }
+        }
+
+        // Componente para manejar reproducción/pausa
+        AFRAME.registerComponent('mindar-video-handler', {
+            init: function () {
+                this.videoId = this.data.videoId;
+                this.video = document.querySelector(`#video${this.videoId}`);
+
+                this.el.addEventListener('click', () => {
+                    playVideo(this.videoId);
+                });
+            }
+        });
+
+        // Componente para controles de tamaño y sonido
+        AFRAME.registerComponent('video-controls', {
+            init: function () {
+                this.videoId = this.data.videoId;
+                this.video = document.querySelector(`#video${this.videoId}`);
+                this.volume = 0.5;
+                
+                // Establecer volumen inicial
+                if (this.video) {
+                    this.video.volume = this.volume;
+                }
+            }
+        });
+
+        // Manejo de la pantalla de carga
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const startButton = document.getElementById('start-button');
+            const scene = document.querySelector('a-scene');
+            
+            // Inicializar volúmenes
+            videos.forEach(video => {
+                if (video) video.volume = 0.5;
+            });
+
+            // Cuando la escena esté cargada
+            scene.addEventListener('loaded', function() {
+                console.log('Escena AR cargada correctamente');
+                
+                // Mostrar botón de iniciar después de 2 segundos
+                setTimeout(() => {
+                    startButton.style.display = 'block';
+                }, 2000);
+            });
+
+            // Botón para iniciar la experiencia
+            startButton.addEventListener('click', function() {
+                // Ocultar pantalla de carga
+                loadingScreen.classList.add('hidden');
+                
+                // Iniciar el tracker AR
+                const arSystem = scene.systems['mindar-image-system'];
+                if (arSystem) {
+                    arSystem.start();
+                    console.log('Experiencia AR iniciada');
+                }
+                
+                // Activar audio con un clic silencioso
+                videos.forEach(video => {
+                    if (video && video.paused) {
+                        video.play().then(() => {
+                            video.pause();
+                        }).catch(e => {});
+                    }
+                });
+            });
+
+            // Manejar errores de carga
+            scene.addEventListener('error', function(e) {
+                console.error('Error cargando la escena:', e);
+                loadingScreen.innerHTML = `
+                    <div style="color: #ff6b6b; font-size: 18px;">
+                        ❌ Error cargando la experiencia<br>
+                        Recarga la página e intenta nuevamente
+                    </div>
+                `;
+            });
+        });
+
+        // Evento cuando se pierde el target
+        document.querySelector('#ar-target').addEventListener('targetLost', function() {
+            pauseAllVideos();
+            console.log('Marcador perdido - Todos los videos pausados');
+        });
+
+        // Controles de teclado mejorados
+        document.addEventListener('keydown', function(e) {
+            // Reproducir/Pausar videos 1, 2, 3 (con pausa automática de otros)
+            if (e.key >= '1' && e.key <= '3') {
+                const videoId = parseInt(e.key);
+                playVideo(videoId);
+            }
+
+            // Controles de volumen (V sube, B baja) - solo para el video actual
+            if (e.key.toLowerCase() === 'v') {
+                const video = videos[currentVideoId - 1];
+                if (video && video.volume < 1.0) {
+                    video.volume = Math.min(1.0, video.volume + 0.1);
+                    console.log(`Volumen video ${currentVideoId}: ${(video.volume * 100).toFixed(0)}%`);
+                }
+            }
+            
+            if (e.key.toLowerCase() === 'b') {
+                const video = videos[currentVideoId - 1];
+                if (video && video.volume > 0) {
+                    video.volume = Math.max(0, video.volume - 0.1);
+                    console.log(`Volumen video ${currentVideoId}: ${(video.volume * 100).toFixed(0)}%`);
+                }
+            }
+
+            // Controles de tamaño (+ agrandar, - achicar)
+            if (e.key === '+' || e.key === '=') {
+                const videoContainer = document.getElementById(`video-container-${currentVideoId}`);
+                const videoEl = document.getElementById(`video-element-${currentVideoId}`);
+                const whatsappBtn = document.getElementById(`whatsapp-3d-${currentVideoId}`);
+                
+                if (videoEl && whatsappBtn) {
+                    const currentWidth = parseFloat(videoEl.getAttribute('width'));
+                    const currentHeight = parseFloat(videoEl.getAttribute('height'));
+                    
+                    videoEl.setAttribute('width', currentWidth * 1.2);
+                    videoEl.setAttribute('height', currentHeight * 1.2);
+                    
+                    // Ajustar posición del botón para que quede abajo
+                    whatsappBtn.setAttribute('position', `0 -${currentHeight * 0.64} 0.01`);
+                    
+                    console.log(`Video ${currentVideoId} agrandado`);
+                }
+            }
+            
+            if (e.key === '-' || e.key === '_') {
+                const videoContainer = document.getElementById(`video-container-${currentVideoId}`);
+                const videoEl = document.getElementById(`video-element-${currentVideoId}`);
+                const whatsappBtn = document.getElementById(`whatsapp-3d-${currentVideoId}`);
+                
+                if (videoEl && whatsappBtn) {
+                    const currentWidth = parseFloat(videoEl.getAttribute('width'));
+                    const currentHeight = parseFloat(videoEl.getAttribute('height'));
+                    
+                    videoEl.setAttribute('width', currentWidth * 0.8);
+                    videoEl.setAttribute('height', currentHeight * 0.8);
+                    
+                    // Ajustar posición del botón para que quede abajo
+                    whatsappBtn.setAttribute('position', `0 -${currentHeight * 0.64} 0.01`);
+                    
+                    console.log(`Video ${currentVideoId} achicado`);
+                }
+            }
+
+            // Silenciar/Activar sonido (M)
+            if (e.key.toLowerCase() === 'm') {
+                const video = videos[currentVideoId - 1];
+                if (video) {
+                    video.muted = !video.muted;
+                    console.log(`Video ${currentVideoId} ${video.muted ? 'silenciado' : 'con sonido'}`);
+                }
+            }
+
+            // Resetear tamaño (0)
+            if (e.key === '0') {
+                const videoContainer = document.getElementById(`video-container-${currentVideoId}`);
+                const videoEl = document.getElementById(`video-element-${currentVideoId}`);
+                const whatsappBtn = document.getElementById(`whatsapp-3d-${currentVideoId}`);
+                
+                if (videoEl && whatsappBtn) {
+                    videoEl.setAttribute('width', 1);
+                    videoEl.setAttribute('height', 1.4);
+                    
+                    // Resetear posición del botón
+                    whatsappBtn.setAttribute('position', '0 -0.9 0.01');
+                    
+                    console.log(`Tamaño del video ${currentVideoId} reseteado`);
+                }
+            }
+
+            // Pausar todos los videos (P)
+            if (e.key.toLowerCase() === 'p') {
+                pauseAllVideos();
+                console.log('Todos los videos pausados');
+            }
+        });
+
+        // Mensaje en consola con todos los controles
+        console.log('🎮 CONTROLES DE TECLADO:');
+        console.log('1, 2, 3 - Reproducir video (pausa automática de otros)');
+        console.log('V - Aumentar volumen del video actual');
+        console.log('B - Disminuir volumen del video actual');
+        console.log('M - Silenciar/Activar sonido del video actual');
+        console.log('+ - Agrandar video actual');
+        console.log('- - Achicar video actual');
+        console.log('0 - Resetear tamaño del video actual');
+        console.log('P - Pausar todos los videos');
+        console.log('');
+        console.log('💡 Características:');
+        console.log('- Solo un video se reproduce a la vez');
+        console.log('- Los videos se pausan automáticamente al desenfocar el marcador');
+        console.log('- Botones de WhatsApp modernos anclados a cada video');
+        console.log('- Pantalla de carga con instrucciones completas');
+
+        // Permitir activación de audio con clic en cualquier parte
+        document.addEventListener('click', function() {
+            videos.forEach(video => {
+                if (video && video.paused) {
+                    video.play().then(() => {
+                        video.pause(); // Solo para activar el audio
+                    }).catch(e => {});
+                }
+            });
+        });
+    </script>
+</body>
+</html>
